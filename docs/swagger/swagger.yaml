@@ -1,0 +1,405 @@
+definitions:
+  models.Booking:
+    properties:
+      created_at:
+        type: string
+      end_time:
+        type: string
+      field:
+        $ref: '#/definitions/models.Field'
+      field_id:
+        type: integer
+      id:
+        type: integer
+      payment:
+        $ref: '#/definitions/models.Payment'
+      start_time:
+        type: string
+      status:
+        $ref: '#/definitions/models.BookingStatus'
+      total_price:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      user_id:
+        type: integer
+    type: object
+  models.BookingStatus:
+    enum:
+    - pending
+    - paid
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusPaid
+    - StatusCancelled
+  models.Field:
+    properties:
+      bookings:
+        items:
+          $ref: '#/definitions/models.Booking'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      price_per_hour:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: integer
+      booking:
+        $ref: '#/definitions/models.Booking'
+      booking_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      payment_method:
+        type: string
+      status:
+        $ref: '#/definitions/models.PaymentStatus'
+      transaction_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.PaymentStatus:
+    enum:
+    - pending
+    - paid
+    - failed
+    type: string
+    x-enum-varnames:
+    - PaymentPending
+    - PaymentCompleted
+    - PaymentFailed
+  models.User:
+    properties:
+      bookings:
+        items:
+          $ref: '#/definitions/models.Booking'
+        type: array
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/models.UserRole'
+      updated_at:
+        type: string
+    type: object
+  models.UserRole:
+    enum:
+    - user
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleUser
+    - RoleAdmin
+  services.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  services.CreateFieldRequest:
+    properties:
+      location:
+        type: string
+      name:
+        type: string
+      price_per_hour:
+        type: integer
+    required:
+    - location
+    - name
+    - price_per_hour
+    type: object
+  services.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  services.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  services.UpdateFieldRequest:
+    properties:
+      location:
+        type: string
+      name:
+        type: string
+      price_per_hour:
+        type: integer
+    type: object
+  utils.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/services.AuthResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Login user
+      tags:
+      - Authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user account with email and password
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/services.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Register a new user
+      tags:
+      - Authentication
+  /fields:
+    get:
+      description: Get list of all available sports fields
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Field'
+                  type: array
+              type: object
+      summary: Get all fields
+      tags:
+      - Fields
+    post:
+      consumes:
+      - application/json
+      description: Create a new sports field (Admin only)
+      parameters:
+      - description: Field details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateFieldRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Field'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new field
+      tags:
+      - Fields
+  /fields/{id}:
+    delete:
+      description: Delete a field (Admin only)
+      parameters:
+      - description: Field ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete field
+      tags:
+      - Fields
+    get:
+      description: Get details of a specific field
+      parameters:
+      - description: Field ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Field'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get field by ID
+      tags:
+      - Fields
+    put:
+      consumes:
+      - application/json
+      description: Update field details (Admin only)
+      parameters:
+      - description: Field ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateFieldRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Field'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update field
+      tags:
+      - Fields
+swagger: "2.0"

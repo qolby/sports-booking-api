@@ -8,6 +8,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
+
+	_ "github.com/qolby/sports-booking-api/docs/swagger"
 	"github.com/qolby/sports-booking-api/internal/config"
 	"github.com/qolby/sports-booking-api/internal/database"
 	"github.com/qolby/sports-booking-api/internal/handlers"
@@ -70,6 +73,7 @@ func main() {
 	// Start server
 	port := fmt.Sprintf(":%s", cfg.Server.Port)
 	log.Printf("Server starting on port %s", port)
+	log.Printf("Swagger documentation available at http://localhost:%s/swagger/index.html", cfg.Server.Port)
 	if err := app.Listen(port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
@@ -83,6 +87,9 @@ func setupRoutes(
 	bookingHandler *handlers.BookingHandler,
 	paymentHandler *handlers.PaymentHandler,
 ) {
+	// Swagger route
+	app.Get("/swagger/*", swagger.HandlerDefault)
+
 	// API v1
 	api := app.Group("/api/v1")
 
