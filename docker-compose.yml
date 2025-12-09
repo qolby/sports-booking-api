@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: sports_booking_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sports_booking_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sports_booking_network
+
+  api:
+    build: .
+    container_name: sports_booking_api
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: sports_booking_db
+      DB_SSLMODE: disable
+      JWT_SECRET: your-super-secret-jwt-key
+      JWT_EXPIRY: 24h
+      APP_PORT: 3000
+      APP_ENV: production
+    depends_on:
+      - postgres
+    networks:
+      - sports_booking_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  sports_booking_network:
+    driver: bridge
