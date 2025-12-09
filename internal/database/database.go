@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/qolby/sports-booking-api/internal/config"
+	"github.com/qolby/sports-booking-api/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
