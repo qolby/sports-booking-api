@@ -1,0 +1,1937 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>api: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/qolby/sports-booking-api/cmd/api/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/qolby/sports-booking-api/docs/swagger/docs.go (0.0%)</option>
+				
+				<option value="file2">github.com/qolby/sports-booking-api/internal/config/config.go (0.0%)</option>
+				
+				<option value="file3">github.com/qolby/sports-booking-api/internal/database/database.go (0.0%)</option>
+				
+				<option value="file4">github.com/qolby/sports-booking-api/internal/handlers/auth_handler.go (0.0%)</option>
+				
+				<option value="file5">github.com/qolby/sports-booking-api/internal/handlers/booking_handler.go (0.0%)</option>
+				
+				<option value="file6">github.com/qolby/sports-booking-api/internal/handlers/field_handler.go (0.0%)</option>
+				
+				<option value="file7">github.com/qolby/sports-booking-api/internal/handlers/payment_handler.go (0.0%)</option>
+				
+				<option value="file8">github.com/qolby/sports-booking-api/internal/middleware/admin_middleware.go (0.0%)</option>
+				
+				<option value="file9">github.com/qolby/sports-booking-api/internal/middleware/auth_middleware.go (0.0%)</option>
+				
+				<option value="file10">github.com/qolby/sports-booking-api/internal/models/user.go (0.0%)</option>
+				
+				<option value="file11">github.com/qolby/sports-booking-api/internal/services/auth_service.go (80.0%)</option>
+				
+				<option value="file12">github.com/qolby/sports-booking-api/internal/services/booking_service.go (51.7%)</option>
+				
+				<option value="file13">github.com/qolby/sports-booking-api/internal/services/field_service.go (0.0%)</option>
+				
+				<option value="file14">github.com/qolby/sports-booking-api/internal/services/payment_service.go (0.0%)</option>
+				
+				<option value="file15">github.com/qolby/sports-booking-api/internal/utils/jwt.go (0.0%)</option>
+				
+				<option value="file16">github.com/qolby/sports-booking-api/internal/utils/response.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "fmt"
+        "log"
+
+        "github.com/gofiber/fiber/v2"
+        "github.com/gofiber/fiber/v2/middleware/cors"
+        "github.com/gofiber/fiber/v2/middleware/logger"
+        "github.com/gofiber/fiber/v2/middleware/recover"
+        "github.com/gofiber/swagger"
+
+        _ "github.com/qolby/sports-booking-api/docs/swagger"
+        "github.com/qolby/sports-booking-api/internal/config"
+        "github.com/qolby/sports-booking-api/internal/database"
+        "github.com/qolby/sports-booking-api/internal/handlers"
+        "github.com/qolby/sports-booking-api/internal/middleware"
+        "github.com/qolby/sports-booking-api/internal/services"
+)
+
+func main() <span class="cov0" title="0">{
+        // Load configuration
+        cfg, err := config.Load()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to load config: %v", err)
+        }</span>
+
+        // Connect to database
+        <span class="cov0" title="0">if err := database.Connect(cfg); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to connect to database: %v", err)
+        }</span>
+
+        // Initialize Fiber app
+        <span class="cov0" title="0">app := fiber.New(fiber.Config{
+                ErrorHandler: func(c *fiber.Ctx, err error) error </span><span class="cov0" title="0">{
+                        code := fiber.StatusInternalServerError
+                        if e, ok := err.(*fiber.Error); ok </span><span class="cov0" title="0">{
+                                code = e.Code
+                        }</span>
+                        <span class="cov0" title="0">return c.Status(code).JSON(fiber.Map{
+                                "success": false,
+                                "message": "An error occurred",
+                                "error":   err.Error(),
+                        })</span>
+                },
+        })
+
+        // Middleware
+        <span class="cov0" title="0">app.Use(recover.New())
+        app.Use(logger.New())
+        app.Use(cors.New(cors.Config{
+                AllowOrigins: "*",
+                AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+                AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
+        }))
+
+        // Initialize services
+        db := database.GetDB()
+        authService := services.NewAuthService(db, cfg)
+        fieldService := services.NewFieldService(db)
+        bookingService := services.NewBookingService(db)
+        paymentService := services.NewPaymentService(db)
+
+        // Initialize handlers
+        authHandler := handlers.NewAuthHandler(authService)
+        fieldHandler := handlers.NewFieldHandler(fieldService)
+        bookingHandler := handlers.NewBookingHandler(bookingService)
+        paymentHandler := handlers.NewPaymentHandler(paymentService)
+
+        // Routes
+        setupRoutes(app, cfg, authHandler, fieldHandler, bookingHandler, paymentHandler)
+
+        // Start server
+        port := fmt.Sprintf(":%s", cfg.Server.Port)
+        log.Printf("Server starting on port %s", port)
+        log.Printf("Swagger documentation available at http://localhost:%s/swagger/index.html", cfg.Server.Port)
+        if err := app.Listen(port); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to start server: %v", err)
+        }</span>
+}
+
+func setupRoutes(
+        app *fiber.App,
+        cfg *config.Config,
+        authHandler *handlers.AuthHandler,
+        fieldHandler *handlers.FieldHandler,
+        bookingHandler *handlers.BookingHandler,
+        paymentHandler *handlers.PaymentHandler,
+) <span class="cov0" title="0">{
+        // Swagger route
+        app.Get("/swagger/*", swagger.HandlerDefault)
+
+        // API v1
+        api := app.Group("/api/v1")
+
+        // Health check
+        api.Get("/health", func(c *fiber.Ctx) error </span><span class="cov0" title="0">{
+                return c.JSON(fiber.Map{
+                        "status":  "ok",
+                        "message": "API is running",
+                })
+        }</span>)
+
+        // Auth routes (public)
+        <span class="cov0" title="0">auth := api.Group("/auth")
+        auth.Post("/register", authHandler.Register)
+        auth.Post("/login", authHandler.Login)
+
+        // Field routes
+        fields := api.Group("/fields")
+        fields.Get("/", fieldHandler.GetAllFields)    // Public
+        fields.Get("/:id", fieldHandler.GetFieldByID) // Public
+
+        // Protected field routes (admin only)
+        fields.Post("/",
+                middleware.AuthRequired(cfg),
+                middleware.AdminOnly(),
+                fieldHandler.CreateField,
+        )
+        fields.Put("/:id",
+                middleware.AuthRequired(cfg),
+                middleware.AdminOnly(),
+                fieldHandler.UpdateField,
+        )
+        fields.Delete("/:id",
+                middleware.AuthRequired(cfg),
+                middleware.AdminOnly(),
+                fieldHandler.DeleteField,
+        )
+
+        // Booking routes (authenticated users)
+        bookings := api.Group("/bookings", middleware.AuthRequired(cfg))
+        bookings.Post("/", bookingHandler.CreateBooking)
+        bookings.Get("/", bookingHandler.GetUserBookings)
+        bookings.Get("/:id", bookingHandler.GetBookingByID)
+
+        // Payment routes (authenticated users)
+        payments := api.Group("/payments", middleware.AuthRequired(cfg))
+        payments.Post("/", paymentHandler.ProcessPayment)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Package swagger Code generated by swaggo/swag. DO NOT EDIT
+package swagger
+
+import "github.com/swaggo/swag"
+
+const docTemplate = `{
+    "schemes": {{ marshal .Schemes }},
+    "swagger": "2.0",
+    "info": {
+        "description": "{{escape .Description}}",
+        "title": "{{.Title}}",
+        "contact": {},
+        "version": "{{.Version}}"
+    },
+    "host": "{{.Host}}",
+    "basePath": "{{.BasePath}}",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate user and return JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/services.AuthResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Register a new user account with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "Registration details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/services.AuthResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/fields": {
+            "get": {
+                "description": "Get list of all available sports fields",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fields"
+                ],
+                "summary": "Get all fields",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Field"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new sports field (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fields"
+                ],
+                "summary": "Create a new field",
+                "parameters": [
+                    {
+                        "description": "Field details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CreateFieldRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Field"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/fields/{id}": {
+            "get": {
+                "description": "Get details of a specific field",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fields"
+                ],
+                "summary": "Get field by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Field ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Field"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update field details (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fields"
+                ],
+                "summary": "Update field",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Field ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.UpdateFieldRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.Field"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a field (Admin only)",
+                "tags": [
+                    "Fields"
+                ],
+                "summary": "Delete field",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Field ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Booking": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "field": {
+                    "$ref": "#/definitions/models.Field"
+                },
+                "field_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "payment": {
+                    "$ref": "#/definitions/models.Payment"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.BookingStatus"
+                },
+                "total_price": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.BookingStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "paid",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "StatusPending",
+                "StatusPaid",
+                "StatusCancelled"
+            ]
+        },
+        "models.Field": {
+            "type": "object",
+            "properties": {
+                "bookings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Booking"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Payment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "booking": {
+                    "$ref": "#/definitions/models.Booking"
+                },
+                "booking_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.PaymentStatus"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "paid",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "PaymentPending",
+                "PaymentCompleted",
+                "PaymentFailed"
+            ]
+        },
+        "models.User": {
+            "type": "object",
+            "properties": {
+                "bookings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Booking"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/models.UserRole"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserRole": {
+            "type": "string",
+            "enum": [
+                "user",
+                "admin"
+            ],
+            "x-enum-varnames": [
+                "RoleUser",
+                "RoleAdmin"
+            ]
+        },
+        "services.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                }
+            }
+        },
+        "services.CreateFieldRequest": {
+            "type": "object",
+            "required": [
+                "location",
+                "name",
+                "price_per_hour"
+            ],
+            "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "services.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.UpdateFieldRequest": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}`
+
+// SwaggerInfo holds exported Swagger Info so clients can modify it
+var SwaggerInfo = &amp;swag.Spec{
+        Version:          "",
+        Host:             "",
+        BasePath:         "",
+        Schemes:          []string{},
+        Title:            "",
+        Description:      "",
+        InfoInstanceName: "swagger",
+        SwaggerTemplate:  docTemplate,
+        LeftDelim:        "{{",
+        RightDelim:       "}}",
+}
+
+func init() <span class="cov0" title="0">{
+        swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package config
+
+import (
+        "fmt"
+        "os"
+        "time"
+
+        "github.com/joho/godotenv"
+)
+
+type Config struct {
+        DB     DatabaseConfig
+        JWT    JWTConfig
+        Server ServerConfig
+}
+
+type DatabaseConfig struct {
+        Host     string
+        Port     string
+        User     string
+        Password string
+        DBName   string
+        SSLMode  string
+}
+
+type JWTConfig struct {
+        Secret string
+        Expiry time.Duration
+}
+
+type ServerConfig struct {
+        Port string
+        Env  string
+}
+
+func Load() (*Config, error) <span class="cov0" title="0">{
+        if err := godotenv.Load(); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("No .env file found, using environment variables")
+        }</span>
+
+        <span class="cov0" title="0">jwtExpiry, _ := time.ParseDuration(getEnv("JWT_EXPIRY", "24h"))
+
+        return &amp;Config{
+                DB: DatabaseConfig{
+                        Host:     getEnv("DB_HOST", "localhost"),
+                        Port:     getEnv("DB_PORT", "5432"),
+                        User:     getEnv("DB_USER", "postgres"),
+                        Password: getEnv("DB_PASSWORD", ""),
+                        DBName:   getEnv("DB_NAME", "sports_booking_db"),
+                        SSLMode:  getEnv("DB_SSLMODE", "disable"),
+                },
+                JWT: JWTConfig{
+                        Secret: getEnv("JWT_SECRET", "your-secret-key"),
+                        Expiry: jwtExpiry,
+                },
+                Server: ServerConfig{
+                        Port: getEnv("APP_PORT", "3000"),
+                        Env:  getEnv("APP_ENV", "development"),
+                },
+        }, nil</span>
+}
+
+func getEnv(key, defaultValue string) string <span class="cov0" title="0">{
+        if value := os.Getenv(key); value != "" </span><span class="cov0" title="0">{
+                return value
+        }</span>
+        <span class="cov0" title="0">return defaultValue</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package database
+
+import (
+        "fmt"
+        "log"
+
+        "github.com/qolby/sports-booking-api/internal/config"
+        "github.com/qolby/sports-booking-api/internal/models"
+        "gorm.io/driver/postgres"
+        "gorm.io/gorm"
+        "gorm.io/gorm/logger"
+)
+
+var DB *gorm.DB
+
+func Connect(cfg *config.Config) error <span class="cov0" title="0">{
+        dsn := fmt.Sprintf(
+                "host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+                cfg.DB.Host,
+                cfg.DB.User,
+                cfg.DB.Password,
+                cfg.DB.DBName,
+                cfg.DB.Port,
+                cfg.DB.SSLMode,
+        )
+
+        var err error
+        DB, err = gorm.Open(postgres.Open(dsn), &amp;gorm.Config{
+                Logger: logger.Default.LogMode(logger.Info),
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to connect to database: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">log.Println("Database connected successfully")
+
+        // Auto migrate models
+        if err := autoMigrate(); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to migrate database: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func autoMigrate() error <span class="cov0" title="0">{
+        return DB.AutoMigrate(
+                &amp;models.User{},
+                &amp;models.Field{},
+                &amp;models.Booking{},
+                &amp;models.Payment{},
+        )
+}</span>
+
+func GetDB() *gorm.DB <span class="cov0" title="0">{
+        return DB
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package handlers
+
+import (
+        "github.com/gofiber/fiber/v2"
+        "github.com/qolby/sports-booking-api/internal/services"
+        "github.com/qolby/sports-booking-api/internal/utils"
+)
+
+type AuthHandler struct {
+        authService *services.AuthService
+}
+
+func NewAuthHandler(authService *services.AuthService) *AuthHandler <span class="cov0" title="0">{
+        return &amp;AuthHandler{authService: authService}
+}</span>
+
+// Register godoc
+// @Summary Register a new user
+// @Description Register a new user account with email and password
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body services.RegisterRequest true "Registration details"
+// @Success 201 {object} utils.Response{data=services.AuthResponse}
+// @Failure 400 {object} utils.Response
+// @Router /auth/register [post]
+func (h *AuthHandler) Register(c *fiber.Ctx) error <span class="cov0" title="0">{
+        var req services.RegisterRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err)
+        }</span>
+
+        <span class="cov0" title="0">result, err := h.authService.Register(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Registration failed", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusCreated, "Registration successful", result)</span>
+}
+
+// Login godoc
+// @Summary Login user
+// @Description Authenticate user and return JWT token
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body services.LoginRequest true "Login credentials"
+// @Success 200 {object} utils.Response{data=services.AuthResponse}
+// @Failure 401 {object} utils.Response
+// @Router /auth/login [post]
+func (h *AuthHandler) Login(c *fiber.Ctx) error <span class="cov0" title="0">{
+        var req services.LoginRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err)
+        }</span>
+
+        <span class="cov0" title="0">result, err := h.authService.Login(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Login failed", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Login successful", result)</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package handlers
+
+import (
+        "strconv"
+
+        "github.com/gofiber/fiber/v2"
+        "github.com/qolby/sports-booking-api/internal/services"
+        "github.com/qolby/sports-booking-api/internal/utils"
+)
+
+type BookingHandler struct {
+        bookingService *services.BookingService
+}
+
+func NewBookingHandler(bookingService *services.BookingService) *BookingHandler <span class="cov0" title="0">{
+        return &amp;BookingHandler{bookingService: bookingService}
+}</span>
+
+func (h *BookingHandler) CreateBooking(c *fiber.Ctx) error <span class="cov0" title="0">{
+        userID := c.Locals("userID").(uint)
+
+        var req services.CreateBookingRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err)
+        }</span>
+
+        <span class="cov0" title="0">booking, err := h.bookingService.CreateBooking(userID, req)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Failed to create booking", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusCreated, "Booking created successfully", booking)</span>
+}
+
+func (h *BookingHandler) GetUserBookings(c *fiber.Ctx) error <span class="cov0" title="0">{
+        userID := c.Locals("userID").(uint)
+
+        bookings, err := h.bookingService.GetUserBookings(userID)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to fetch bookings", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Bookings retrieved successfully", bookings)</span>
+}
+
+func (h *BookingHandler) GetBookingByID(c *fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid booking ID", err)
+        }</span>
+
+        <span class="cov0" title="0">booking, err := h.bookingService.GetBookingByID(uint(id))
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusNotFound, "Booking not found", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Booking retrieved successfully", booking)</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package handlers
+
+import (
+        "strconv"
+
+        "github.com/gofiber/fiber/v2"
+        "github.com/qolby/sports-booking-api/internal/services"
+        "github.com/qolby/sports-booking-api/internal/utils"
+)
+
+type FieldHandler struct {
+        fieldService *services.FieldService
+}
+
+func NewFieldHandler(fieldService *services.FieldService) *FieldHandler <span class="cov0" title="0">{
+        return &amp;FieldHandler{fieldService: fieldService}
+}</span>
+
+// CreateField godoc
+// @Summary Create a new field
+// @Description Create a new sports field (Admin only)
+// @Tags Fields
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body services.CreateFieldRequest true "Field details"
+// @Success 201 {object} utils.Response{data=models.Field}
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Failure 403 {object} utils.Response
+// @Router /fields [post]
+func (h *FieldHandler) CreateField(c *fiber.Ctx) error <span class="cov0" title="0">{
+        var req services.CreateFieldRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err)
+        }</span>
+
+        <span class="cov0" title="0">field, err := h.fieldService.CreateField(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to create field", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusCreated, "Field created successfully", field)</span>
+}
+
+// GetAllFields godoc
+// @Summary Get all fields
+// @Description Get list of all available sports fields
+// @Tags Fields
+// @Produce json
+// @Success 200 {object} utils.Response{data=[]models.Field}
+// @Router /fields [get]
+func (h *FieldHandler) GetAllFields(c *fiber.Ctx) error <span class="cov0" title="0">{
+        fields, err := h.fieldService.GetAllFields()
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to fetch fields", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Fields retrieved successfully", fields)</span>
+}
+
+// GetFieldByID godoc
+// @Summary Get field by ID
+// @Description Get details of a specific field
+// @Tags Fields
+// @Produce json
+// @Param id path int true "Field ID"
+// @Success 200 {object} utils.Response{data=models.Field}
+// @Failure 404 {object} utils.Response
+// @Router /fields/{id} [get]
+func (h *FieldHandler) GetFieldByID(c *fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid field ID", err)
+        }</span>
+
+        <span class="cov0" title="0">field, err := h.fieldService.GetFieldByID(uint(id))
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusNotFound, "Field not found", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Field retrieved successfully", field)</span>
+}
+
+// UpdateField godoc
+// @Summary Update field
+// @Description Update field details (Admin only)
+// @Tags Fields
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Field ID"
+// @Param request body services.UpdateFieldRequest true "Update details"
+// @Success 200 {object} utils.Response{data=models.Field}
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Failure 403 {object} utils.Response
+// @Router /fields/{id} [put]
+func (h *FieldHandler) UpdateField(c *fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid field ID", err)
+        }</span>
+
+        <span class="cov0" title="0">var req services.UpdateFieldRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err)
+        }</span>
+
+        <span class="cov0" title="0">field, err := h.fieldService.UpdateField(uint(id), req)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to update field", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Field updated successfully", field)</span>
+}
+
+// DeleteField godoc
+// @Summary Delete field
+// @Description Delete a field (Admin only)
+// @Tags Fields
+// @Security BearerAuth
+// @Param id path int true "Field ID"
+// @Success 200 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Failure 403 {object} utils.Response
+// @Router /fields/{id} [delete]
+func (h *FieldHandler) DeleteField(c *fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid field ID", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := h.fieldService.DeleteField(uint(id)); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusInternalServerError, "Failed to delete field", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Field deleted successfully", nil)</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package handlers
+
+import (
+        "github.com/gofiber/fiber/v2"
+        "github.com/qolby/sports-booking-api/internal/services"
+        "github.com/qolby/sports-booking-api/internal/utils"
+)
+
+type PaymentHandler struct {
+        paymentService *services.PaymentService
+}
+
+func NewPaymentHandler(paymentService *services.PaymentService) *PaymentHandler <span class="cov0" title="0">{
+        return &amp;PaymentHandler{paymentService: paymentService}
+}</span>
+
+func (h *PaymentHandler) ProcessPayment(c *fiber.Ctx) error <span class="cov0" title="0">{
+        var req services.CreatePaymentRequest
+        if err := c.BodyParser(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Invalid request body", err)
+        }</span>
+
+        <span class="cov0" title="0">payment, err := h.paymentService.ProcessPayment(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return utils.ErrorResponse(c, fiber.StatusBadRequest, "Payment processing failed", err)
+        }</span>
+
+        <span class="cov0" title="0">return utils.SuccessResponse(c, fiber.StatusOK, "Payment processed successfully", payment)</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package middleware
+
+import (
+        "github.com/gofiber/fiber/v2"
+        "github.com/qolby/sports-booking-api/internal/utils"
+)
+
+func AdminOnly() fiber.Handler <span class="cov0" title="0">{
+        return func(c *fiber.Ctx) error </span><span class="cov0" title="0">{
+                role := c.Locals("userRole").(string)
+
+                if role != "admin" </span><span class="cov0" title="0">{
+                        return utils.ErrorResponse(c, fiber.StatusForbidden, "Admin access required", nil)
+                }</span>
+
+                <span class="cov0" title="0">return c.Next()</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package middleware
+
+import (
+        "strings"
+
+        "github.com/gofiber/fiber/v2"
+        "github.com/qolby/sports-booking-api/internal/config"
+        "github.com/qolby/sports-booking-api/internal/utils"
+)
+
+func AuthRequired(cfg *config.Config) fiber.Handler <span class="cov0" title="0">{
+        return func(c *fiber.Ctx) error </span><span class="cov0" title="0">{
+                authHeader := c.Get("Authorization")
+                if authHeader == "" </span><span class="cov0" title="0">{
+                        return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Missing authorization header", nil)
+                }</span>
+
+                <span class="cov0" title="0">tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+                if tokenString == authHeader </span><span class="cov0" title="0">{
+                        return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Invalid authorization format", nil)
+                }</span>
+
+                <span class="cov0" title="0">claims, err := utils.ValidateToken(tokenString, cfg)
+                if err != nil </span><span class="cov0" title="0">{
+                        return utils.ErrorResponse(c, fiber.StatusUnauthorized, "Invalid or expired token", err)
+                }</span>
+
+                // Store user info in context
+                <span class="cov0" title="0">c.Locals("userID", claims.UserID)
+                c.Locals("userEmail", claims.Email)
+                c.Locals("userRole", claims.Role)
+
+                return c.Next()</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package models
+
+import (
+        "time"
+
+        "golang.org/x/crypto/bcrypt"
+        "gorm.io/gorm"
+)
+
+type UserRole string
+
+const (
+        RoleUser  UserRole = "user"
+        RoleAdmin UserRole = "admin"
+)
+
+type User struct {
+        ID        uint           `gorm:"primarykey" json:"id"`
+        Email     string         `gorm:"uniqueIndex;not null" json:"email"`
+        Password  string         `gorm:"not null" json:"-"`
+        Name      string         `gorm:"not null" json:"name"`
+        Role      UserRole       `gorm:"type:varchar(20);default:'user'" json:"role"`
+        CreatedAt time.Time      `json:"created_at"`
+        UpdatedAt time.Time      `json:"updated_at"`
+        DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+        Bookings  []Booking      `gorm:"foreignKey:UserID" json:"bookings,omitempty"`
+}
+
+func (u *User) HashPassword(password string) error <span class="cov0" title="0">{
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">u.Password = string(hashedPassword)
+        return nil</span>
+}
+
+func (u *User) CheckPassword(password string) bool <span class="cov0" title="0">{
+        err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+        return err == nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package services
+
+import (
+        "errors"
+
+        "github.com/qolby/sports-booking-api/internal/config"
+        "github.com/qolby/sports-booking-api/internal/models"
+        "github.com/qolby/sports-booking-api/internal/utils"
+        "gorm.io/gorm"
+)
+
+type AuthService struct {
+        db  *gorm.DB
+        cfg *config.Config
+}
+
+func NewAuthService(db *gorm.DB, cfg *config.Config) *AuthService <span class="cov8" title="1">{
+        return &amp;AuthService{db: db, cfg: cfg}
+}</span>
+
+type RegisterRequest struct {
+        Email    string `json:"email" validate:"required,email"`
+        Password string `json:"password" validate:"required,min=6"`
+        Name     string `json:"name" validate:"required"`
+        Role     string `json:"role"`
+}
+
+type LoginRequest struct {
+        Email    string `json:"email" validate:"required,email"`
+        Password string `json:"password" validate:"required"`
+}
+
+type AuthResponse struct {
+        User  models.User `json:"user"`
+        Token string      `json:"token"`
+}
+
+func (s *AuthService) Register(req RegisterRequest) (*AuthResponse, error) <span class="cov8" title="1">{
+        // Check if user already exists
+        var existingUser models.User
+        if err := s.db.Where("email = ?", req.Email).First(&amp;existingUser).Error; err == nil </span><span class="cov8" title="1">{
+                return nil, errors.New("email already registered")
+        }</span>
+
+        // Set default role to user if not specified or invalid
+        <span class="cov8" title="1">role := models.RoleUser
+        if req.Role == string(models.RoleAdmin) </span><span class="cov0" title="0">{
+                role = models.RoleAdmin
+        }</span>
+
+        <span class="cov8" title="1">user := models.User{
+                Email: req.Email,
+                Name:  req.Name,
+                Role:  role,
+        }
+
+        if err := user.HashPassword(req.Password); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if err := s.db.Create(&amp;user).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">token, err := utils.GenerateToken(user.ID, user.Email, string(user.Role), s.cfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;AuthResponse{
+                User:  user,
+                Token: token,
+        }, nil</span>
+}
+
+func (s *AuthService) Login(req LoginRequest) (*AuthResponse, error) <span class="cov8" title="1">{
+        var user models.User
+        if err := s.db.Where("email = ?", req.Email).First(&amp;user).Error; err != nil </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid credentials")
+        }</span>
+
+        <span class="cov8" title="1">if !user.CheckPassword(req.Password) </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid credentials")
+        }</span>
+
+        <span class="cov8" title="1">token, err := utils.GenerateToken(user.ID, user.Email, string(user.Role), s.cfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;AuthResponse{
+                User:  user,
+                Token: token,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package services
+
+import (
+        "errors"
+        "time"
+
+        "github.com/qolby/sports-booking-api/internal/models"
+        "gorm.io/gorm"
+)
+
+type BookingService struct {
+        db *gorm.DB
+}
+
+func NewBookingService(db *gorm.DB) *BookingService <span class="cov8" title="1">{
+        return &amp;BookingService{db: db}
+}</span>
+
+type CreateBookingRequest struct {
+        FieldID   uint      `json:"field_id" validate:"required"`
+        StartTime time.Time `json:"start_time" validate:"required"`
+        EndTime   time.Time `json:"end_time" validate:"required"`
+}
+
+func (s *BookingService) CreateBooking(userID uint, req CreateBookingRequest) (*models.Booking, error) <span class="cov8" title="1">{
+        // Validate time range
+        if req.EndTime.Before(req.StartTime) || req.EndTime.Equal(req.StartTime) </span><span class="cov8" title="1">{
+                return nil, errors.New("end time must be after start time")
+        }</span>
+
+        // Check if field exists
+        <span class="cov8" title="1">var field models.Field
+        if err := s.db.First(&amp;field, req.FieldID).Error; err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, errors.New("field not found")
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        // Check for overlapping bookings
+        <span class="cov8" title="1">var count int64
+        s.db.Model(&amp;models.Booking{}).Where(
+                "field_id = ? AND status != ? AND ((start_time &lt; ? AND end_time &gt; ?) OR (start_time &lt; ? AND end_time &gt; ?) OR (start_time &gt;= ? AND end_time &lt;= ?))",
+                req.FieldID,
+                models.StatusCancelled,
+                req.EndTime, req.StartTime,
+                req.EndTime, req.EndTime,
+                req.StartTime, req.EndTime,
+        ).Count(&amp;count)
+
+        if count &gt; 0 </span><span class="cov8" title="1">{
+                return nil, errors.New("field is already booked for this time slot")
+        }</span>
+
+        // Calculate total price
+        <span class="cov8" title="1">duration := req.EndTime.Sub(req.StartTime).Hours()
+        totalPrice := int(duration * float64(field.PricePerHour))
+
+        booking := models.Booking{
+                UserID:     userID,
+                FieldID:    req.FieldID,
+                StartTime:  req.StartTime,
+                EndTime:    req.EndTime,
+                Status:     models.StatusPending,
+                TotalPrice: totalPrice,
+        }
+
+        if err := s.db.Create(&amp;booking).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Load relations
+        <span class="cov8" title="1">s.db.Preload("Field").Preload("User").First(&amp;booking, booking.ID)
+
+        return &amp;booking, nil</span>
+}
+
+func (s *BookingService) GetUserBookings(userID uint) ([]models.Booking, error) <span class="cov0" title="0">{
+        var bookings []models.Booking
+        if err := s.db.Preload("Field").Where("user_id = ?", userID).Find(&amp;bookings).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return bookings, nil</span>
+}
+
+func (s *BookingService) GetBookingByID(id uint) (*models.Booking, error) <span class="cov0" title="0">{
+        var booking models.Booking
+        if err := s.db.Preload("Field").Preload("User").Preload("Payment").First(&amp;booking, id).Error; err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, errors.New("booking not found")
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+        <span class="cov0" title="0">return &amp;booking, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package services
+
+import (
+        "errors"
+
+        "github.com/qolby/sports-booking-api/internal/models"
+        "gorm.io/gorm"
+)
+
+type FieldService struct {
+        db *gorm.DB
+}
+
+func NewFieldService(db *gorm.DB) *FieldService <span class="cov0" title="0">{
+        return &amp;FieldService{db: db}
+}</span>
+
+type CreateFieldRequest struct {
+        Name         string `json:"name" validate:"required"`
+        PricePerHour int    `json:"price_per_hour" validate:"required,gt=0"`
+        Location     string `json:"location" validate:"required"`
+}
+
+type UpdateFieldRequest struct {
+        Name         string `json:"name"`
+        PricePerHour int    `json:"price_per_hour"`
+        Location     string `json:"location"`
+}
+
+func (s *FieldService) CreateField(req CreateFieldRequest) (*models.Field, error) <span class="cov0" title="0">{
+        field := models.Field{
+                Name:         req.Name,
+                PricePerHour: req.PricePerHour,
+                Location:     req.Location,
+        }
+
+        if err := s.db.Create(&amp;field).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;field, nil</span>
+}
+
+func (s *FieldService) GetAllFields() ([]models.Field, error) <span class="cov0" title="0">{
+        var fields []models.Field
+        if err := s.db.Find(&amp;fields).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return fields, nil</span>
+}
+
+func (s *FieldService) GetFieldByID(id uint) (*models.Field, error) <span class="cov0" title="0">{
+        var field models.Field
+        if err := s.db.First(&amp;field, id).Error; err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, errors.New("field not found")
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+        <span class="cov0" title="0">return &amp;field, nil</span>
+}
+
+func (s *FieldService) UpdateField(id uint, req UpdateFieldRequest) (*models.Field, error) <span class="cov0" title="0">{
+        field, err := s.GetFieldByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">updates := map[string]interface{}{}
+        if req.Name != "" </span><span class="cov0" title="0">{
+                updates["name"] = req.Name
+        }</span>
+        <span class="cov0" title="0">if req.PricePerHour &gt; 0 </span><span class="cov0" title="0">{
+                updates["price_per_hour"] = req.PricePerHour
+        }</span>
+        <span class="cov0" title="0">if req.Location != "" </span><span class="cov0" title="0">{
+                updates["location"] = req.Location
+        }</span>
+
+        <span class="cov0" title="0">if err := s.db.Model(field).Updates(updates).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return field, nil</span>
+}
+
+func (s *FieldService) DeleteField(id uint) error <span class="cov0" title="0">{
+        result := s.db.Delete(&amp;models.Field{}, id)
+        if result.Error != nil </span><span class="cov0" title="0">{
+                return result.Error
+        }</span>
+        <span class="cov0" title="0">if result.RowsAffected == 0 </span><span class="cov0" title="0">{
+                return errors.New("field not found")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package services
+
+import (
+        "errors"
+        "fmt"
+        "time"
+
+        "github.com/qolby/sports-booking-api/internal/models"
+        "gorm.io/gorm"
+)
+
+type PaymentService struct {
+        db *gorm.DB
+}
+
+func NewPaymentService(db *gorm.DB) *PaymentService <span class="cov0" title="0">{
+        return &amp;PaymentService{db: db}
+}</span>
+
+type CreatePaymentRequest struct {
+        BookingID     uint   `json:"booking_id" validate:"required"`
+        PaymentMethod string `json:"payment_method" validate:"required"`
+}
+
+func (s *PaymentService) ProcessPayment(req CreatePaymentRequest) (*models.Payment, error) <span class="cov0" title="0">{
+        // Get booking
+        var booking models.Booking
+        if err := s.db.First(&amp;booking, req.BookingID).Error; err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, errors.New("booking not found")
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        // Check if booking is already paid
+        <span class="cov0" title="0">if booking.Status == models.StatusPaid </span><span class="cov0" title="0">{
+                return nil, errors.New("booking is already paid")
+        }</span>
+
+        // Check if payment already exists
+        <span class="cov0" title="0">var existingPayment models.Payment
+        if err := s.db.Where("booking_id = ?", req.BookingID).First(&amp;existingPayment).Error; err == nil </span><span class="cov0" title="0">{
+                return nil, errors.New("payment already exists for this booking")
+        }</span>
+
+        // Mock payment processing
+        <span class="cov0" title="0">transactionID := fmt.Sprintf("TRX-%d-%d", booking.ID, time.Now().Unix())
+
+        // Create payment
+        payment := models.Payment{
+                BookingID:     req.BookingID,
+                Amount:        booking.TotalPrice,
+                Status:        models.PaymentCompleted,
+                PaymentMethod: req.PaymentMethod,
+                TransactionID: transactionID,
+        }
+
+        // Start transaction
+        tx := s.db.Begin()
+        defer func() </span><span class="cov0" title="0">{
+                if r := recover(); r != nil </span><span class="cov0" title="0">{
+                        tx.Rollback()
+                }</span>
+        }()
+
+        // Create payment
+        <span class="cov0" title="0">if err := tx.Create(&amp;payment).Error; err != nil </span><span class="cov0" title="0">{
+                tx.Rollback()
+                return nil, err
+        }</span>
+
+        // Update booking status
+        <span class="cov0" title="0">if err := tx.Model(&amp;booking).Update("status", models.StatusPaid).Error; err != nil </span><span class="cov0" title="0">{
+                tx.Rollback()
+                return nil, err
+        }</span>
+
+        // Commit transaction
+        <span class="cov0" title="0">if err := tx.Commit().Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Load relations
+        <span class="cov0" title="0">s.db.Preload("Booking.Field").Preload("Booking.User").First(&amp;payment, payment.ID)
+
+        return &amp;payment, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package utils
+
+import (
+        "errors"
+        "time"
+
+        "github.com/golang-jwt/jwt/v5"
+        "github.com/qolby/sports-booking-api/internal/config"
+)
+
+type Claims struct {
+        UserID uint   `json:"user_id"`
+        Email  string `json:"email"`
+        Role   string `json:"role"`
+        jwt.RegisteredClaims
+}
+
+func GenerateToken(userID uint, email, role string, cfg *config.Config) (string, error) <span class="cov0" title="0">{
+        claims := Claims{
+                UserID: userID,
+                Email:  email,
+                Role:   role,
+                RegisteredClaims: jwt.RegisteredClaims{
+                        ExpiresAt: jwt.NewNumericDate(time.Now().Add(cfg.JWT.Expiry)),
+                        IssuedAt:  jwt.NewNumericDate(time.Now()),
+                },
+        }
+
+        token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+        return token.SignedString([]byte(cfg.JWT.Secret))
+}</span>
+
+func ValidateToken(tokenString string, cfg *config.Config) (*Claims, error) <span class="cov0" title="0">{
+        token, err := jwt.ParseWithClaims(tokenString, &amp;Claims{}, func(token *jwt.Token) (interface{}, error) </span><span class="cov0" title="0">{
+                return []byte(cfg.JWT.Secret), nil
+        }</span>)
+
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">claims, ok := token.Claims.(*Claims)
+        if !ok || !token.Valid </span><span class="cov0" title="0">{
+                return nil, errors.New("invalid token")
+        }</span>
+
+        <span class="cov0" title="0">return claims, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package utils
+
+import "github.com/gofiber/fiber/v2"
+
+type Response struct {
+        Success bool        `json:"success"`
+        Message string      `json:"message"`
+        Data    interface{} `json:"data,omitempty"`
+        Error   string      `json:"error,omitempty"`
+}
+
+func SuccessResponse(c *fiber.Ctx, status int, message string, data interface{}) error <span class="cov0" title="0">{
+        return c.Status(status).JSON(Response{
+                Success: true,
+                Message: message,
+                Data:    data,
+        })
+}</span>
+
+func ErrorResponse(c *fiber.Ctx, status int, message string, err error) error <span class="cov0" title="0">{
+        errMsg := ""
+        if err != nil </span><span class="cov0" title="0">{
+                errMsg = err.Error()
+        }</span>
+        <span class="cov0" title="0">return c.Status(status).JSON(Response{
+                Success: false,
+                Message: message,
+                Error:   errMsg,
+        })</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
