@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/qolby/sports-booking-api/internal/config"
 	"github.com/qolby/sports-booking-api/internal/models"
@@ -32,7 +33,18 @@ func Connect(cfg *config.Config) error {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	log.Println("Database connected successfully")
+	// Configure connection pool
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get database instance: %w", err)
+	}
+
+	// Set connection pool settings
+	sqlDB.SetMaxIdleConns(10)           // Maximum number of idle connections
+	sqlDB.SetMaxOpenConns(100)          // Maximum number of open connections
+	sqlDB.SetConnMaxLifetime(time.Hour) // Maximum lifetime of a connection
+
+	log.Println("Database connected successfully with connection pooling")
 
 	// Auto migrate models
 	if err := autoMigrate(); err != nil {
